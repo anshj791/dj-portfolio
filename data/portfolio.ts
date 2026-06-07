@@ -83,7 +83,7 @@ export const portfolioData: PortfolioData = {
     tagline: "Luxury interiors shaped by light, material, and intention.",
     email: "studio@diyajain.com",
     phone: "+91 98765 43210",
-    whatsapp: "+919876543210",
+    whatsapp: "+919340500688",
     location: "Lower Parel, Mumbai, India",
     socials: [
       { label: "Instagram", href: "#" },
