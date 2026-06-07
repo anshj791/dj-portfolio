@@ -62,6 +62,7 @@ export function AdminDashboard() {
   const { data, updateData, resetData, isOwner, authChecked } = useContent();
   const [draft, setDraft] = useState<PortfolioData>(data);
   const [activeProject, setActiveProject] = useState(0);
+  const [publishMessage, setPublishMessage] = useState("");
 
   useEffect(() => {
     setDraft(data);
@@ -96,13 +97,39 @@ export function AdminDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <GradientButton onClick={() => updateData(draft)}>
+            <GradientButton
+              onClick={async () => {
+                setPublishMessage("Publishing...");
+                try {
+                  await updateData(draft);
+                  setPublishMessage("Published to Supabase. Other devices will load the update.");
+                } catch (error) {
+                  setPublishMessage(error instanceof Error ? error.message : "Publish failed");
+                }
+              }}
+            >
               <Save className="mr-2" size={16} /> Save and publish
             </GradientButton>
-            <button onClick={resetData} className="button-focus rounded-[8px] border border-ink/10 px-4 py-3 text-xs uppercase tracking-[0.18em] text-ink/62 hover:border-clay hover:text-clay">
+            <button
+              onClick={async () => {
+                setPublishMessage("Resetting...");
+                try {
+                  await resetData();
+                  setPublishMessage("Reset and published.");
+                } catch (error) {
+                  setPublishMessage(error instanceof Error ? error.message : "Reset failed");
+                }
+              }}
+              className="button-focus rounded-[8px] border border-ink/10 px-4 py-3 text-xs uppercase tracking-[0.18em] text-ink/62 hover:border-clay hover:text-clay"
+            >
               Reset
             </button>
           </div>
+          {publishMessage ? (
+            <p className="basis-full rounded-[6px] bg-white px-3 py-2 text-sm text-ink/68">
+              {publishMessage}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[0.78fr_1.22fr]">

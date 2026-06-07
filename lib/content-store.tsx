@@ -10,8 +10,8 @@ type ContentContextValue = {
   authChecked: boolean;
   login: (id: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  updateData: (next: PortfolioData) => void;
-  resetData: () => void;
+  updateData: (next: PortfolioData) => Promise<void>;
+  resetData: () => Promise<void>;
 };
 
 const ContentContext = createContext<ContentContextValue | null>(null);
@@ -24,6 +24,17 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = window.localStorage.getItem(CONTENT_KEY);
     if (saved) setData(JSON.parse(saved));
+    fetch("/api/content")
+      .then((response) => response.json())
+      .then((content) => {
+        if (content.data) {
+          setData(content.data);
+          window.localStorage.setItem(CONTENT_KEY, JSON.stringify(content.data));
+        }
+      })
+      .catch(() => {
+        // Local cache remains the offline fallback.
+      });
     fetch("/api/auth/session")
       .then((response) => response.json())
       .then((session) => setIsOwner(Boolean(session.isOwner)))
@@ -53,13 +64,31 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
         setIsOwner(false);
         setAuthChecked(true);
       },
-      updateData: (next) => {
+      updateData: async (next) => {
         setData(next);
         window.localStorage.setItem(CONTENT_KEY, JSON.stringify(next));
+        const response = await fetch("/api/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: next })
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null);
+          throw new Error(payload?.error || "Failed to publish content");
+        }
       },
-      resetData: () => {
+      resetData: async () => {
         setData(portfolioData);
         window.localStorage.removeItem(CONTENT_KEY);
+        const response = await fetch("/api/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: portfolioData })
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null);
+          throw new Error(payload?.error || "Failed to reset content");
+        }
       }
     }),
     [data, isOwner, authChecked]
