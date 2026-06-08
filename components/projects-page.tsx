@@ -49,7 +49,7 @@ export function ProjectsPage() {
             <Link href={`/projects/${project.slug}`} key={project.slug}>
               <HoverCard>
                 <div className="relative h-80">
-                  <Image src={project.heroImage} alt={project.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+                  <Image src={project.heroImage || "/media/extra/1.png"} alt={project.title || project.slug} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                 </div>
                 <div className="p-6">
                   <p className="text-xs uppercase tracking-[0.24em] text-bronze">

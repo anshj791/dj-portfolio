@@ -8,6 +8,7 @@ import { AnimatedSection, GradientButton, HoverCard, SectionLabel } from "@/comp
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/home-page";
 import { EditLink, OwnerToolbar } from "@/components/owner-toolbar";
+import { projectTechnicalGroups } from "@/data/portfolio";
 
 export function ProjectDetailPage({ slug }: { slug: string }) {
   const { data } = useContent();
@@ -38,88 +39,123 @@ export function ProjectDetailPage({ slug }: { slug: string }) {
             </Link>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <SectionLabel>{project.category}</SectionLabel>
+                {project.category ? <SectionLabel>{project.category}</SectionLabel> : null}
                 <h1 className="font-display text-[clamp(4rem,9vw,8rem)] font-light leading-[0.84]">{project.title}</h1>
+                {project.subtitle ? <p className="mt-4 text-xl leading-tight text-ink/70">{project.subtitle}</p> : null}
               </div>
               <EditLink />
             </div>
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {[
+              ["Location", project.location],
+              ["Year", project.year],
+              ["Completion Date", project.completionDate],
+              ["Focus", project.focus]
+            ].filter(([, value]) => Boolean(value)).length > 0 ? (
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  ["Location", project.location],
+                  ["Year", project.year],
+                  ["Completion Date", project.completionDate],
+                  ["Focus", project.focus]
+                ].filter(([, value]) => Boolean(value)).map(([label, value]) => (
+                  <div key={label} className="rounded-[8px] border border-ink/10 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-bronze">{label}</p>
+                    <p className="mt-2 text-ink/70">{value}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <Image
+            src={project.heroImage || "/media/extra/1.png"}
+            alt={project.title || project.slug}
+            width={980}
+            height={900}
+            className="aspect-[5/4] rounded-[8px] object-cover shadow-luxury"
+            priority
+          />
+        </section>
+
+        {project.overview ? (
+          <AnimatedSection className="section-shell grid gap-8 py-20 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <SectionLabel>Project Overview</SectionLabel>
+              <p className="font-display text-4xl leading-tight text-ink/85">{project.overview}</p>
+            </div>
+            <div className="grid gap-4">
               {[
-                ["Location", project.location],
-                ["Year", project.year],
-                ["Focus", project.focus]
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-[8px] border border-ink/10 p-4">
+                ["Project Duration", project.duration],
+                ["Area", project.area],
+                ["Materials", project.materials?.length ? project.materials.join(", ") : ""]
+              ].filter(([, value]) => Boolean(value)).map(([label, value]) => (
+                <div key={label} className="rounded-[8px] border border-ink/10 bg-bone p-5">
                   <p className="text-xs uppercase tracking-[0.22em] text-bronze">{label}</p>
-                  <p className="mt-2 text-ink/70">{value}</p>
+                  <p className="mt-3 leading-7 text-ink/70">{value}</p>
                 </div>
               ))}
             </div>
-          </div>
-          <Image src={project.heroImage} alt={project.title} width={980} height={900} className="aspect-[5/4] rounded-[8px] object-cover shadow-luxury" priority />
-        </section>
+          </AnimatedSection>
+        ) : null}
 
-        <AnimatedSection className="section-shell grid gap-8 py-20 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <SectionLabel>Project Overview</SectionLabel>
-            <p className="font-display text-4xl leading-tight text-ink/85">{project.overview}</p>
-          </div>
-          <div className="grid gap-4">
-            {[
-              ["Project Duration", project.duration],
-              ["Area", project.area],
-              ["Materials", project.materials.join(", ")]
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-[8px] border border-ink/10 bg-bone p-5">
-                <p className="text-xs uppercase tracking-[0.22em] text-bronze">{label}</p>
-                <p className="mt-3 leading-7 text-ink/70">{value}</p>
+        {project.gallery?.length ? (
+          <AnimatedSection className="bg-[#ede1d2] py-20">
+            <div className="section-shell">
+              <SectionLabel>Image Gallery</SectionLabel>
+              <div className="grid gap-5 md:grid-cols-2">
+                {project.gallery.map((image) => (
+                  <HoverCard key={`${image.src}-${image.label}`}>
+                    <Image src={image.src} alt={(image.alt ?? image.label) || image.src} width={900} height={720} className="h-[420px] w-full object-cover" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ink/75 to-transparent p-5 text-bone">
+                      {image.label ? <p className="font-display text-3xl">{image.label}</p> : null}
+                      {image.caption ? <p className="mt-2 text-sm text-bone/80">{image.caption}</p> : null}
+                    </div>
+                  </HoverCard>
+                ))}
               </div>
-            ))}
-          </div>
-        </AnimatedSection>
+            </div>
+          </AnimatedSection>
+        ) : null}
 
-        <AnimatedSection className="bg-[#ede1d2] py-20">
-          <div className="section-shell">
-            <SectionLabel>Image Gallery</SectionLabel>
+        {projectTechnicalGroups(project).length ? (
+          <AnimatedSection className="section-shell py-20">
+            <SectionLabel>Before / Plans / Technical Drawings</SectionLabel>
             <div className="grid gap-5 md:grid-cols-2">
-              {project.gallery.map((image) => (
-                <HoverCard key={image.src}>
-                  <Image src={image.src} alt={image.alt} width={900} height={720} className="h-[420px] w-full object-cover" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ink/75 to-transparent p-5 text-bone">
-                    <p className="font-display text-3xl">{image.label}</p>
+              {projectTechnicalGroups(project).map((group) => (
+                <div key={group.key} className="rounded-[8px] border border-ink/10 bg-white p-4 shadow-sm">
+                  <h2 className="font-display text-2xl">{group.title}</h2>
+                  <div className="mt-5 grid gap-4">
+                    {group.images.map((image, index) => (
+                      <div key={`${image.src}-${index}`} className="rounded-[8px] overflow-hidden border border-ink/10 bg-[#fbf6f0]">
+                        <Image src={image.src} alt={(image.alt ?? image.label) || image.src} width={900} height={650} className="h-auto w-full object-contain" />
+                        <div className="p-4">
+                          {image.label ? <p className="text-sm uppercase tracking-[0.18em] text-ink/58">{image.label}</p> : null}
+                          {image.description ? <p className="mt-2 text-ink/70">{image.description}</p> : null}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </HoverCard>
+                </div>
               ))}
             </div>
-          </div>
-        </AnimatedSection>
+          </AnimatedSection>
+        ) : null}
 
-        <AnimatedSection className="section-shell py-20">
-          <SectionLabel>Before / Plans / Technical Drawings</SectionLabel>
-          <div className="grid gap-5 md:grid-cols-2">
-            {project.drawings.map((image) => (
-              <div key={image.src} className="rounded-[8px] border border-ink/10 bg-white p-4 shadow-sm">
-                <Image src={image.src} alt={image.alt} width={900} height={650} className="h-auto w-full rounded-[6px] object-contain" />
-                <p className="mt-4 text-sm uppercase tracking-[0.18em] text-ink/58">{image.label}</p>
+        {project.details?.length ? (
+          <AnimatedSection className="section-shell grid gap-5 py-12 md:grid-cols-3">
+            {project.details.map((detail) => (
+              <div key={detail.title} className="rounded-[8px] border border-ink/10 bg-bone p-6">
+                <h2 className="font-display text-3xl">{detail.title}</h2>
+                <p className="mt-4 leading-7 text-ink/62">{detail.body}</p>
               </div>
             ))}
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection className="section-shell grid gap-5 py-12 md:grid-cols-3">
-          {project.details.map((detail) => (
-            <div key={detail.title} className="rounded-[8px] border border-ink/10 bg-bone p-6">
-              <h2 className="font-display text-3xl">{detail.title}</h2>
-              <p className="mt-4 leading-7 text-ink/62">{detail.body}</p>
-            </div>
-          ))}
-        </AnimatedSection>
+          </AnimatedSection>
+        ) : null}
 
         {project.testimonial ? (
           <AnimatedSection className="bg-ink py-20 text-bone">
             <div className="section-shell">
               <div className="mb-8 flex gap-1 text-bronze">
-                {Array.from({ length: project.testimonial.rating }).map((_, index) => (
+                {Array.from({ length: project.testimonial.rating ?? 0 }).map((_, index) => (
                   <Star key={index} size={16} fill="currentColor" />
                 ))}
               </div>

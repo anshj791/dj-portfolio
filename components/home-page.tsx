@@ -14,7 +14,12 @@ import { EditLink, OwnerToolbar } from "@/components/owner-toolbar";
 export function HomePage() {
   const { data } = useContent();
   const featured = data.projects.slice(0, 4);
+  const hasWork = Boolean(data.projects.length);
+  const hasServices = Boolean(data.services?.items?.length);
+  const hasTestimonials = Boolean(data.testimonials?.length);
+  const hasProcess = Boolean(data.process?.length);
 
+  const whatsappLink = data.owner.whatsapp ? `https://wa.me/${data.owner.whatsapp.replace(/[^0-9]/g, "")}` : undefined;
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "InteriorDesignService",
@@ -46,12 +51,14 @@ export function HomePage() {
                 <GradientButton href="#work">
                   {data.hero.cta} <ArrowRight className="ml-3" size={16} />
                 </GradientButton>
-                <a
-                  href={`https://wa.me/${data.owner.whatsapp.replace(/[^0-9]/g, "")}`}
-                  className="button-focus inline-flex min-h-11 items-center rounded-[8px] border border-ink/12 px-5 py-3 text-sm font-medium uppercase tracking-[0.18em] text-ink transition hover:border-bronze hover:text-bronze"
-                >
-                  WhatsApp
-                </a>
+                {whatsappLink ? (
+                  <a
+                    href={whatsappLink}
+                    className="button-focus inline-flex min-h-11 items-center rounded-[8px] border border-ink/12 px-5 py-3 text-sm font-medium uppercase tracking-[0.18em] text-ink transition hover:border-bronze hover:text-bronze"
+                  >
+                    WhatsApp
+                  </a>
+                ) : null}
               </div>
             </motion.div>
             <div className="relative h-[52vh] min-h-[420px] overflow-hidden rounded-[8px] border border-ink/10 bg-[#e8dccd] shadow-luxury lg:h-[76vh]">
@@ -108,94 +115,104 @@ export function HomePage() {
           </div>
         </AnimatedSection>
 
-        <AnimatedSection id="work" className="bg-[#ede1d2] py-24">
-          <div className="section-shell">
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
-              <div>
-                <SectionLabel>Selected Work</SectionLabel>
-                <h2 className="font-display text-[clamp(3rem,7vw,6rem)] font-light leading-none">Recent projects</h2>
+        {hasWork ? (
+          <AnimatedSection id="work" className="bg-[#ede1d2] py-24">
+            <div className="section-shell">
+              <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+                <div>
+                  <SectionLabel>Selected Work</SectionLabel>
+                  <h2 className="font-display text-[clamp(3rem,7vw,6rem)] font-light leading-none">Recent projects</h2>
+                </div>
+                <div className="flex gap-3">
+                  <EditLink />
+                  <GradientButton href="/projects">View all projects</GradientButton>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <EditLink />
-                <GradientButton href="/projects">View all projects</GradientButton>
+              <div className="grid gap-5 md:grid-cols-2">
+                {featured.map((project, index) => (
+                  <Link href={`/projects/${project.slug}`} key={project.slug}>
+                    <HoverCard className={index === 0 ? "md:row-span-2" : ""}>
+                      <Image
+                        src={project.heroImage || "/media/extra/1.png"}
+                        alt={project.title || project.slug}
+                        width={900}
+                        height={900}
+                        className="h-[390px] w-full object-cover md:h-full"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent p-6 text-bone">
+                        <p className="text-xs uppercase tracking-[0.22em] text-bone/75">
+                          {project.category}{project.location ? ` / ${project.location}` : ""}
+                        </p>
+                        <h3 className="mt-2 font-display text-4xl">{project.title}</h3>
+                      </div>
+                    </HoverCard>
+                  </Link>
+                ))}
               </div>
             </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              {featured.map((project, index) => (
-                <Link href={`/projects/${project.slug}`} key={project.slug}>
-                  <HoverCard className={index === 0 ? "md:row-span-2" : ""}>
-                    <Image
-                      src={project.heroImage}
-                      alt={project.title}
-                      width={900}
-                      height={900}
-                      className="h-[390px] w-full object-cover md:h-full"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent p-6 text-bone">
-                      <p className="text-xs uppercase tracking-[0.22em] text-bone/75">
-                        {project.category} / {project.location}
-                      </p>
-                      <h3 className="mt-2 font-display text-4xl">{project.title}</h3>
-                    </div>
-                  </HoverCard>
-                </Link>
+          </AnimatedSection>
+        ) : null}
+
+        {hasServices ? (
+          <AnimatedSection id="services" className="section-shell py-24">
+            <div className="mb-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+              <div>
+                <SectionLabel>What We Offer</SectionLabel>
+                <h2 className="font-display text-[clamp(3rem,7vw,5.8rem)] font-light leading-none">{data.services.title}</h2>
+              </div>
+              <p className="self-end text-lg leading-8 text-ink/65">{data.services.description}</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {data.services.items.map((service, index) => (
+                <HoverCard key={`${service.title}-${index}`} className="p-6">
+                  <p className="text-xs uppercase tracking-[0.24em] text-bronze">{String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="mt-8 font-display text-3xl">{service.title}</h3>
+                  <p className="mt-4 leading-7 text-ink/62">{service.description}</p>
+                </HoverCard>
               ))}
             </div>
-          </div>
-        </AnimatedSection>
+          </AnimatedSection>
+        ) : null}
 
-        <AnimatedSection id="services" className="section-shell py-24">
-          <div className="mb-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <SectionLabel>What We Offer</SectionLabel>
-              <h2 className="font-display text-[clamp(3rem,7vw,5.8rem)] font-light leading-none">{data.services.title}</h2>
-            </div>
-            <p className="self-end text-lg leading-8 text-ink/65">{data.services.description}</p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.services.items.map((service, index) => (
-              <HoverCard key={service.title} className="p-6">
-                <p className="text-xs uppercase tracking-[0.24em] text-bronze">{String(index + 1).padStart(2, "0")}</p>
-                <h3 className="mt-8 font-display text-3xl">{service.title}</h3>
-                <p className="mt-4 leading-7 text-ink/62">{service.description}</p>
-              </HoverCard>
-            ))}
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection className="bg-ink py-24 text-bone">
-          <div className="section-shell">
-            <SectionLabel>Client Words</SectionLabel>
-            <div className="grid gap-5 md:grid-cols-2">
-              {data.testimonials.map((item) => (
-                <div key={item.author} className="rounded-[8px] border border-bone/12 bg-bone/[0.04] p-7">
-                  <div className="mb-8 flex gap-1 text-bronze">
-                    {Array.from({ length: item.rating }).map((_, index) => (
-                      <Star key={index} size={16} fill="currentColor" />
-                    ))}
+        {hasTestimonials ? (
+          <AnimatedSection className="bg-ink py-24 text-bone">
+            <div className="section-shell">
+              <SectionLabel>Client Words</SectionLabel>
+              <div className="grid gap-5 md:grid-cols-2">
+                {data.testimonials.map((item, index) => (
+                  <div key={`${item.author}-${index}`} className="rounded-[8px] border border-bone/12 bg-bone/[0.04] p-7">
+                    {item.rating ? (
+                      <div className="mb-8 flex gap-1 text-bronze">
+                        {Array.from({ length: item.rating }).map((_, index) => (
+                          <Star key={index} size={16} fill="currentColor" />
+                        ))}
+                      </div>
+                    ) : null}
+                    <p className="font-display text-3xl leading-tight">"{item.quote}"</p>
+                    <p className="mt-8 text-sm uppercase tracking-[0.2em] text-bone/60">
+                      {item.author}{item.role ? ` / ${item.role}` : ""}{item.company ? `, ${item.company}` : ""}
+                    </p>
                   </div>
-                  <p className="font-display text-3xl leading-tight">"{item.quote}"</p>
-                  <p className="mt-8 text-sm uppercase tracking-[0.2em] text-bone/60">
-                    {item.author} / {item.role}
-                  </p>
+                ))}
+              </div>
+            </div>
+          </AnimatedSection>
+        ) : null}
+
+        {hasProcess ? (
+          <AnimatedSection className="section-shell py-24">
+            <SectionLabel>How We Work</SectionLabel>
+            <div className="grid gap-4 md:grid-cols-4">
+              {data.process.map((step, index) => (
+                <div key={`${step.title}-${index}`} className="rounded-[8px] border border-ink/10 p-5">
+                  <p className="font-display text-5xl text-bronze">{String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="mt-8 font-display text-3xl">{step.title}</h3>
+                  <p className="mt-4 leading-7 text-ink/62">{step.description}</p>
                 </div>
               ))}
             </div>
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection className="section-shell py-24">
-          <SectionLabel>How We Work</SectionLabel>
-          <div className="grid gap-4 md:grid-cols-4">
-            {data.process.map((step, index) => (
-              <div key={step.title} className="rounded-[8px] border border-ink/10 p-5">
-                <p className="font-display text-5xl text-bronze">{String(index + 1).padStart(2, "0")}</p>
-                <h3 className="mt-8 font-display text-3xl">{step.title}</h3>
-                <p className="mt-4 leading-7 text-ink/62">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </AnimatedSection>
+          </AnimatedSection>
+        ) : null}
 
         <AnimatedSection id="contact" className="bg-[#e5d6c3] py-24">
           <div className="section-shell grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -205,7 +222,9 @@ export function HomePage() {
               <div className="mt-8 grid gap-4 text-ink/70">
                 <a className="flex items-center gap-3" href={`mailto:${data.owner.email}`}><Mail size={18} /> {data.owner.email}</a>
                 <a className="flex items-center gap-3" href={`tel:${data.owner.phone}`}><Phone size={18} /> {data.owner.phone}</a>
-                <a className="flex items-center gap-3" href={`https://wa.me/${data.owner.whatsapp.replace(/[^0-9]/g, "")}`}><MessageCircle size={18} /> WhatsApp inquiry</a>
+                {whatsappLink ? (
+                  <a className="flex items-center gap-3" href={whatsappLink}><MessageCircle size={18} /> WhatsApp inquiry</a>
+                ) : null}
                 <span className="flex items-center gap-3"><MapPin size={18} /> {data.owner.location}</span>
               </div>
               <div className="map-grid mt-8 h-56 rounded-[8px] border border-ink/10 bg-bone/50 p-5">

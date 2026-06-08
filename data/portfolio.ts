@@ -1,77 +1,112 @@
 export type ImageAsset = {
   src: string;
-  alt: string;
+  alt?: string;
   label?: string;
+  caption?: string;
+  description?: string;
 };
 
 export type Project = {
   slug: string;
-  title: string;
-  category: string;
-  location: string;
-  year: string;
-  summary: string;
-  overview: string;
-  heroImage: string;
-  duration: string;
-  area: string;
-  focus: string;
-  materials: string[];
-  gallery: ImageAsset[];
-  drawings: ImageAsset[];
+  title?: string;
+  subtitle?: string;
+  category?: string;
+  location?: string;
+  year?: string;
+  completionDate?: string;
+  summary?: string;
+  overview?: string;
+  heroImage?: string;
+  duration?: string;
+  area?: string;
+  focus?: string;
+  materials?: string[];
+  gallery?: ImageAsset[];
+  drawings?: ImageAsset[];
+  technical?: {
+    before?: ImageAsset[];
+    floorPlans?: ImageAsset[];
+    technicalDrawings?: ImageAsset[];
+    renders?: ImageAsset[];
+    concepts?: ImageAsset[];
+  };
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
   testimonial?: {
-    quote: string;
-    author: string;
-    role: string;
-    rating: number;
+    quote?: string;
+    author?: string;
+    role?: string;
+    rating?: number;
   };
   details: {
-    title: string;
-    body: string;
+    title?: string;
+    body?: string;
   }[];
+};
+
+export type ServiceItem = {
+  title?: string;
+  description?: string;
+  icon?: string;
+  featured?: boolean;
+};
+
+export type TestimonialItem = {
+  quote?: string;
+  author?: string;
+  role?: string;
+  company?: string;
+  image?: string;
+  rating?: number;
+};
+
+export type ProcessStep = {
+  stepNumber?: string;
+  title?: string;
+  description?: string;
+  icon?: string;
+  image?: string;
 };
 
 export type PortfolioData = {
   owner: {
-    name: string;
-    studio: string;
-    tagline: string;
-    email: string;
-    phone: string;
-    whatsapp: string;
-    location: string;
+    name?: string;
+    studio?: string;
+    tagline?: string;
+    email?: string;
+    phone?: string;
+    whatsapp?: string;
+    location?: string;
     socials: { label: string; href: string }[];
   };
   hero: {
-    headline: string;
-    description: string;
-    cta: string;
-    image: string;
+    headline?: string;
+    description?: string;
+    cta?: string;
+    image?: string;
   };
   about: {
-    label: string;
-    heading: string;
+    label?: string;
+    heading?: string;
     bio: string[];
     experienceStartYear: number;
-    education: string;
-    school: string;
+    education?: string;
+    school?: string;
     coursework: string[];
     skills: string[];
     specialties: string[];
     certifications: string[];
   };
   services: {
-    title: string;
-    description: string;
-    items: { title: string; description: string }[];
+    title?: string;
+    description?: string;
+    items: ServiceItem[];
   };
-  testimonials: {
-    quote: string;
-    author: string;
-    role: string;
-    rating: number;
-  }[];
-  process: { title: string; description: string }[];
+  testimonials: TestimonialItem[];
+  process: ProcessStep[];
   categories: string[];
   projects: Project[];
 };
@@ -229,11 +264,12 @@ export const portfolioData: PortfolioData = {
         "Handwoven textiles"
       ],
       gallery: [
-        { src: "/media/project1/3d/1.png", alt: "Master Bedroom", label: "Master Bedroom" },
+        { src: "/media/project1/3d/1.png", alt: "Master Bedroom", label: "Master Bedroom", caption: "Master Bedroom" },
         {
           src: "/media/project1/3d/c.png",
           alt: "Bedroom and Wardrobe",
-          label: "Bedroom and Wardrobe"
+          label: "Bedroom and Wardrobe",
+          caption: "Bedroom and Wardrobe"
         }
       ],
       drawings: [
@@ -248,6 +284,28 @@ export const portfolioData: PortfolioData = {
           label: "Elevation C - Wardrobe Storage"
         }
       ],
+      technical: {
+        floorPlans: [
+          {
+            src: "/media/project1/2d/1.png",
+            alt: "Elevation A - Master Bedroom",
+            label: "Elevation A - Master Bedroom"
+          },
+          {
+            src: "/media/project1/2d/2.png",
+            alt: "Elevation C - Wardrobe Storage",
+            label: "Elevation C - Wardrobe Storage"
+          }
+        ],
+        renders: [
+          { src: "/media/project1/3d/1.png", alt: "Master Bedroom", label: "Master Bedroom" },
+          { src: "/media/project1/3d/c.png", alt: "Bedroom and Wardrobe", label: "Bedroom and Wardrobe" }
+        ]
+      },
+      seo: {
+        title: "The Amber Residence | Diya Jain Studio",
+        description: "A contemporary luxury residential interior design project in Mumbai."
+      },
       testimonial: {
         quote:
           "Every detail feels considered, from the light to the texture under hand. The home is calm, warm, and deeply personal.",
@@ -295,13 +353,27 @@ export const portfolioData: PortfolioData = {
         "Brushed metal details"
       ],
       gallery: [
-        { src: "/media/project2/3d/1.png", alt: "Theater rendering 1", label: "Theater View 1" },
-        { src: "/media/project2/3d/2.png", alt: "Theater rendering 2", label: "Theater View 2" }
+        { src: "/media/project2/3d/1.png", alt: "Theater rendering 1", label: "Theater View 1", caption: "Theater View 1" },
+        { src: "/media/project2/3d/2.png", alt: "Theater rendering 2", label: "Theater View 2", caption: "Theater View 2" }
       ],
       drawings: [
         { src: "/media/project2/2d/1.png", alt: "Floor Plan Layout", label: "Floor Plan Layout" },
         { src: "/media/project2/2d/2.png", alt: "Wall Elevation", label: "Wall Elevation" }
       ],
+      technical: {
+        floorPlans: [
+          { src: "/media/project2/2d/1.png", alt: "Floor Plan Layout", label: "Floor Plan Layout" },
+          { src: "/media/project2/2d/2.png", alt: "Wall Elevation", label: "Wall Elevation" }
+        ],
+        renders: [
+          { src: "/media/project2/3d/1.png", alt: "Theater rendering 1", label: "Theater View 1" },
+          { src: "/media/project2/3d/2.png", alt: "Theater rendering 2", label: "Theater View 2" }
+        ]
+      },
+      seo: {
+        title: "Home Theater | Diya Jain Studio",
+        description: "A luxury private home theater with acoustic design and immersive lighting."
+      },
       testimonial: {
         quote:
           "It feels immersive and polished, with every technical requirement hidden inside a very elegant room.",
@@ -329,3 +401,78 @@ export const portfolioData: PortfolioData = {
     }
   ]
 };
+
+export function hasText(value?: string | null) {
+  return Boolean(value && value.trim().length > 0);
+}
+
+export function filledImages(images?: ImageAsset[] | null) {
+  return (images || []).filter((image) => hasText(image.src));
+}
+
+export function projectTechnicalGroups(project: Project) {
+  const legacyDrawings = filledImages(project.drawings);
+  return [
+    { key: "before", title: "Before Images", images: filledImages(project.technical?.before) },
+    {
+      key: "floorPlans",
+      title: "Floor Plans",
+      images: filledImages(project.technical?.floorPlans).length
+        ? filledImages(project.technical?.floorPlans)
+        : legacyDrawings
+    },
+    {
+      key: "technicalDrawings",
+      title: "Technical Drawings",
+      images: filledImages(project.technical?.technicalDrawings)
+    },
+    { key: "renders", title: "3D Renders", images: filledImages(project.technical?.renders) },
+    { key: "concepts", title: "Design Concepts", images: filledImages(project.technical?.concepts) }
+  ].filter((group) => group.images.length > 0);
+}
+
+export function normalizePortfolioData(input?: PortfolioData | null): PortfolioData {
+  const base = portfolioData;
+  const next = input || base;
+
+  return {
+    ...base,
+    ...next,
+    owner: { ...base.owner, ...next.owner, socials: next.owner?.socials || base.owner.socials },
+    hero: { ...base.hero, ...next.hero },
+    about: { ...base.about, ...next.about },
+    services: {
+      ...base.services,
+      ...next.services,
+      items: (next.services?.items || []).map((service) => ({ ...service }))
+    },
+    testimonials: (next.testimonials || []).map((testimonial) => ({ ...testimonial })),
+    process: (next.process || []).map((step, index) => ({
+      stepNumber: step.stepNumber || String(index + 1).padStart(2, "0"),
+      ...step
+    })),
+    categories: next.categories || base.categories,
+    projects: (next.projects || []).map((project) => {
+      const gallery = filledImages(project.gallery);
+      const drawings = filledImages(project.drawings);
+      return {
+        ...project,
+        slug: project.slug,
+        gallery,
+        drawings,
+        details: project.details || [],
+        materials: project.materials || [],
+        technical: {
+          before: filledImages(project.technical?.before),
+          floorPlans: filledImages(project.technical?.floorPlans).length
+            ? filledImages(project.technical?.floorPlans)
+            : drawings,
+          technicalDrawings: filledImages(project.technical?.technicalDrawings),
+          renders: filledImages(project.technical?.renders),
+          concepts: filledImages(project.technical?.concepts)
+        },
+        seo: project.seo || {}
+      };
+    })
+  };
+}

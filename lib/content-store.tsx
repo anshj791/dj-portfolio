@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { portfolioData, type PortfolioData } from "@/data/portfolio";
+import { normalizePortfolioData, portfolioData, type PortfolioData } from "@/data/portfolio";
 
 const CONTENT_KEY = "diya-portfolio-content";
 type ContentContextValue = {
@@ -23,13 +23,14 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = window.localStorage.getItem(CONTENT_KEY);
-    if (saved) setData(JSON.parse(saved));
+    if (saved) setData(normalizePortfolioData(JSON.parse(saved)));
     fetch("/api/content")
       .then((response) => response.json())
       .then((content) => {
         if (content.data) {
-          setData(content.data);
-          window.localStorage.setItem(CONTENT_KEY, JSON.stringify(content.data));
+          const normalized = normalizePortfolioData(content.data);
+          setData(normalized);
+          window.localStorage.setItem(CONTENT_KEY, JSON.stringify(normalized));
         }
       })
       .catch(() => {
@@ -65,12 +66,13 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
         setAuthChecked(true);
       },
       updateData: async (next) => {
-        setData(next);
-        window.localStorage.setItem(CONTENT_KEY, JSON.stringify(next));
+        const normalized = normalizePortfolioData(next);
+        setData(normalized);
+        window.localStorage.setItem(CONTENT_KEY, JSON.stringify(normalized));
         const response = await fetch("/api/content", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: next })
+          body: JSON.stringify({ data: normalized })
         });
         if (!response.ok) {
           const payload = await response.json().catch(() => null);
