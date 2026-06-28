@@ -383,6 +383,11 @@ export function AdminDashboard() {
                   value={(draft.about.bio || []).join("\n\n")}
                   onChange={(value) => update({ ...draft, about: { ...draft.about, bio: value.split(/\n\s*\n/).filter(Boolean) } })}
                 />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TextField label="Education (Foundation)" value={draft.about.education ?? ""} onChange={(value) => update({ ...draft, about: { ...draft.about, education: value } })} />
+                  <TextField label="School" value={draft.about.school ?? ""} onChange={(value) => update({ ...draft, about: { ...draft.about, school: value } })} />
+                </div>
+                <TextField label="Experience start year" value={String(draft.about.experienceStartYear ?? "")} onChange={(value) => update({ ...draft, about: { ...draft.about, experienceStartYear: Number(value) || 0 } })} />
                 <TextField label="Services description" multiline value={draft.services.description ?? ""} onChange={(value) => update({ ...draft, services: { ...draft.services, description: value } })} />
               </div>
             </section>

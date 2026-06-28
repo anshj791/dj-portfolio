@@ -69,14 +69,19 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
         const normalized = normalizePortfolioData(next);
         setData(normalized);
         window.localStorage.setItem(CONTENT_KEY, JSON.stringify(normalized));
-        const response = await fetch("/api/content", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: normalized })
-        });
-        if (!response.ok) {
-          const payload = await response.json().catch(() => null);
-          throw new Error(payload?.error || "Failed to publish content");
+        try {
+          const response = await fetch("/api/content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: normalized })
+          });
+          if (!response.ok) {
+            const payload = await response.json().catch(() => null);
+            throw new Error(payload?.error || `Failed to publish content (status ${response.status})`);
+          }
+        } catch (err: any) {
+          // Surface network errors with a clearer message
+          throw new Error(err?.message ? `Publish failed: ${err.message}` : "Publish failed: unknown error");
         }
       },
       resetData: async () => {

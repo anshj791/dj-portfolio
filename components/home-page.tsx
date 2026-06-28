@@ -174,45 +174,7 @@ export function HomePage() {
           </AnimatedSection>
         ) : null}
 
-        {hasTestimonials ? (
-          <AnimatedSection className="bg-ink py-24 text-bone">
-            <div className="section-shell">
-              <SectionLabel>Client Words</SectionLabel>
-              <div className="grid gap-5 md:grid-cols-2">
-                {data.testimonials.map((item, index) => (
-                  <div key={`${item.author}-${index}`} className="rounded-[8px] border border-bone/12 bg-bone/[0.04] p-7">
-                    {item.rating ? (
-                      <div className="mb-8 flex gap-1 text-bronze">
-                        {Array.from({ length: item.rating }).map((_, index) => (
-                          <Star key={index} size={16} fill="currentColor" />
-                        ))}
-                      </div>
-                    ) : null}
-                    <p className="font-display text-3xl leading-tight">"{item.quote}"</p>
-                    <p className="mt-8 text-sm uppercase tracking-[0.2em] text-bone/60">
-                      {item.author}{item.role ? ` / ${item.role}` : ""}{item.company ? `, ${item.company}` : ""}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </AnimatedSection>
-        ) : null}
-
-        {hasProcess ? (
-          <AnimatedSection className="section-shell py-24">
-            <SectionLabel>How We Work</SectionLabel>
-            <div className="grid gap-4 md:grid-cols-4">
-              {data.process.map((step, index) => (
-                <div key={`${step.title}-${index}`} className="rounded-[8px] border border-ink/10 p-5">
-                  <p className="font-display text-5xl text-bronze">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="mt-8 font-display text-3xl">{step.title}</h3>
-                  <p className="mt-4 leading-7 text-ink/62">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </AnimatedSection>
-        ) : null}
+        {/* Testimonials and How We Work sections removed per CMS preference. */}
 
         <AnimatedSection id="contact" className="bg-[#e5d6c3] py-24">
           <div className="section-shell grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -227,10 +189,7 @@ export function HomePage() {
                 ) : null}
                 <span className="flex items-center gap-3"><MapPin size={18} /> {data.owner.location}</span>
               </div>
-              <div className="map-grid mt-8 h-56 rounded-[8px] border border-ink/10 bg-bone/50 p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-bronze">Location Map</p>
-                <p className="mt-24 font-display text-3xl text-ink/70">Mumbai studio consultations by appointment</p>
-              </div>
+              {/* Location map removed as requested */}
             </div>
             <form className="glass-panel grid gap-4 rounded-[8px] p-5" onSubmit={(event) => event.preventDefault()}>
               <div className="grid gap-4 sm:grid-cols-2">
