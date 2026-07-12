@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, ChevronDown, ChevronUp, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
 import { useContent } from "@/lib/content-store";
 import type { ImageAsset, PortfolioData, ProcessStep, Project, ServiceItem, TestimonialItem } from "@/data/portfolio";
@@ -102,6 +102,9 @@ export function AdminDashboard() {
   const [activeProject, setActiveProject] = useState(0);
   const [activeProjectTab, setActiveProjectTab] = useState("General");
   const [publishMessage, setPublishMessage] = useState("");
+  const [uploadMessage, setUploadMessage] = useState("");
+  
+  const heroImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDraft(data);
@@ -125,22 +128,34 @@ export function AdminDashboard() {
 
   const createImageAsset = (src: string, alt = project?.title ?? "", label = "") => ({ src, alt, label, caption: "", description: "" });
 
-  const uploadImage = (file: File, apply: (src: string) => void) => {
-    const reader = new FileReader();
-    reader.onload = () => apply(String(reader.result));
-    reader.readAsDataURL(file);
+  const uploadImage = async (file: File) => {
+    setUploadMessage(`Uploading ${file.name}...`);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.url) {
+      throw new Error(payload?.error || "Image upload failed");
+    }
+
+    return String(payload.url);
   };
 
-  const uploadImages = (files: FileList, apply: (images: string[]) => void) => {
-    const results: string[] = [];
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        results.push(String(reader.result));
-        if (results.length === files.length) apply(results);
-      };
-      reader.readAsDataURL(file);
-    });
+  const uploadImages = async (files: FileList | File[]) => {
+    const fileList = Array.from(files);
+    const urls: string[] = [];
+
+    for (const file of fileList) {
+      urls.push(await uploadImage(file));
+    }
+
+    setUploadMessage(`${urls.length} image${urls.length === 1 ? "" : "s"} uploaded.`);
+    return urls;
   };
 
   const updateProject = (next: Project) => {
@@ -177,37 +192,56 @@ export function AdminDashboard() {
     update({ ...draft, process });
   };
 
-  const renderImageManager = (label: string, images: ImageAsset[], onChange: (next: ImageAsset[]) => void) => (
+  const renderImageManager = (label: string, images: ImageAsset[], onChange: (next: ImageAsset[]) => void) => {
+    const inputId = `image-upload-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
+    return (
     <section className="rounded-[8px] border border-ink/10 bg-white p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <SectionLabel>{label}</SectionLabel>
-          <p className="text-sm text-ink/60">Select multiple images, drag & drop, or reorder and edit captions.</p>
+          <p className="text-sm text-ink/60">Click to select multiple images, drag & drop, or reorder and edit captions.</p>
         </div>
-        <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition">
+        <label
+          htmlFor={inputId}
+          className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze transition hover:bg-bronze hover:text-bone"
+        >
+          <ImagePlus size={16} />
           <span>+ Select Images</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(event) => {
-              const files = event.target.files;
-              if (!files) return;
-              uploadImages(files, (sources) => onChange([...images, ...sources.map((src) => createImageAsset(src, project?.title ?? "", ""))]));
-              event.target.value = "";
-            }}
-          />
         </label>
+        <input
+          id={inputId}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={async (event) => {
+            const files = event.target.files;
+            if (!files) return;
+            try {
+              const sources = await uploadImages(files);
+              onChange([...images, ...sources.map((src) => createImageAsset(src, project?.title ?? "", ""))]);
+            } catch (error) {
+              setUploadMessage(error instanceof Error ? error.message : "Image upload failed");
+            } finally {
+              event.target.value = "";
+            }
+          }}
+        />
       </div>
       <div
         className="group rounded-[8px] border border-dashed border-ink/30 p-8 text-center text-sm text-ink/60"
         onDragOver={(event) => event.preventDefault()}
-        onDrop={(event) => {
+        onDrop={async (event) => {
           event.preventDefault();
-          const file = event.dataTransfer.files[0];
-          if (!file) return;
-          uploadImage(file, (src) => onChange([...images, createImageAsset(src, project?.title ?? "", "")]));
+          const files = event.dataTransfer.files;
+          if (!files.length) return;
+          try {
+            const sources = await uploadImages(files);
+            onChange([...images, ...sources.map((src) => createImageAsset(src, project?.title ?? "", ""))]);
+          } catch (error) {
+            setUploadMessage(error instanceof Error ? error.message : "Image upload failed");
+          }
         }}
       >
         Drag images here or click to upload
@@ -284,7 +318,8 @@ export function AdminDashboard() {
         ))}
       </div>
     </section>
-  );
+    );
+  };
 
   return (
     <main className="min-h-screen bg-[#f3eadf] px-4 py-8">
@@ -331,6 +366,11 @@ export function AdminDashboard() {
           {publishMessage ? (
             <p className="basis-full rounded-[6px] bg-white px-3 py-2 text-sm text-ink/68">
               {publishMessage}
+            </p>
+          ) : null}
+          {uploadMessage ? (
+            <p className="basis-full rounded-[6px] bg-bronze/10 px-3 py-2 text-sm text-bronze">
+              {uploadMessage}
             </p>
           ) : null}
         </div>
@@ -525,19 +565,32 @@ export function AdminDashboard() {
                               <img src={project.heroImage ?? "/media/extra/1.png"} alt={project.title ?? "Hero image"} className="h-full w-full object-cover" />
                             </div>
                             <div className="mt-4 flex flex-wrap gap-2">
-                              <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition">
-                                + Upload Hero Image
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(event) => {
-                                    const file = event.target.files?.[0];
-                                    if (!file) return;
-                                    uploadImage(file, (src) => updateProjectField({ heroImage: src }));
-                                  }}
-                                />
-                              </label>
+                              <button
+                                type="button"
+                                onClick={() => heroImageInputRef.current?.click()}
+                                className="button-focus inline-flex items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition"
+                              >
+                                <ImagePlus size={16} />
+                                <span>+ Upload Hero Image</span>
+                              </button>
+                              <input
+                                ref={heroImageInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (event) => {
+                                  const file = event.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const src = await uploadImage(file);
+                                    updateProjectField({ heroImage: src });
+                                  } catch (error) {
+                                    setUploadMessage(error instanceof Error ? error.message : "Image upload failed");
+                                  } finally {
+                                    event.target.value = "";
+                                  }
+                                }}
+                              />
                               <button
                                 type="button"
                                 onClick={() => updateProjectField({ heroImage: "" })}
