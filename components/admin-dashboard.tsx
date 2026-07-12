@@ -10,6 +10,12 @@ import type { ImageAsset, PortfolioData, ProcessStep, Project, ServiceItem, Test
 import { GradientButton, SectionLabel } from "@/components/ui/aceternity";
 import { supabaseReady } from "@/lib/supabase";
 
+function UploadSpinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+  );
+}
+
 function TextField({
   label,
   value,
@@ -103,6 +109,7 @@ export function AdminDashboard() {
   const [activeProjectTab, setActiveProjectTab] = useState("General");
   const [publishMessage, setPublishMessage] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   
   const heroImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,13 +156,19 @@ export function AdminDashboard() {
   const uploadImages = async (files: FileList | File[]) => {
     const fileList = Array.from(files);
     const urls: string[] = [];
+    setIsUploading(true);
 
-    for (const file of fileList) {
-      urls.push(await uploadImage(file));
+    try {
+      for (const [index, file] of fileList.entries()) {
+        setUploadMessage(`Uploading ${index + 1} of ${fileList.length}: ${file.name}`);
+        urls.push(await uploadImage(file));
+      }
+
+      setUploadMessage(`${urls.length} image${urls.length === 1 ? "" : "s"} uploaded.`);
+      return urls;
+    } finally {
+      setIsUploading(false);
     }
-
-    setUploadMessage(`${urls.length} image${urls.length === 1 ? "" : "s"} uploaded.`);
-    return urls;
   };
 
   const updateProject = (next: Project) => {
@@ -204,10 +217,12 @@ export function AdminDashboard() {
         </div>
         <label
           htmlFor={inputId}
-          className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze transition hover:bg-bronze hover:text-bone"
+          className={`button-focus inline-flex items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze transition hover:bg-bronze hover:text-bone ${
+            isUploading ? "pointer-events-none opacity-60" : "cursor-pointer"
+          }`}
         >
-          <ImagePlus size={16} />
-          <span>+ Select Images</span>
+          {isUploading ? <UploadSpinner /> : <ImagePlus size={16} />}
+          <span>{isUploading ? "Uploading..." : "+ Select Images"}</span>
         </label>
         <input
           id={inputId}
@@ -215,6 +230,7 @@ export function AdminDashboard() {
           accept="image/*"
           multiple
           className="hidden"
+          disabled={isUploading}
           onChange={async (event) => {
             const files = event.target.files;
             if (!files) return;
@@ -230,10 +246,13 @@ export function AdminDashboard() {
         />
       </div>
       <div
-        className="group rounded-[8px] border border-dashed border-ink/30 p-8 text-center text-sm text-ink/60"
+        className={`group relative overflow-hidden rounded-[8px] border border-dashed border-ink/30 p-8 text-center text-sm text-ink/60 ${
+          isUploading ? "bg-bronze/5" : ""
+        }`}
         onDragOver={(event) => event.preventDefault()}
         onDrop={async (event) => {
           event.preventDefault();
+          if (isUploading) return;
           const files = event.dataTransfer.files;
           if (!files.length) return;
           try {
@@ -244,7 +263,14 @@ export function AdminDashboard() {
           }
         }}
       >
-        Drag images here or click to upload
+        {isUploading ? (
+          <span className="inline-flex items-center gap-2 text-bronze">
+            <UploadSpinner /> Uploading images to media library...
+          </span>
+        ) : (
+          "Drag images here or click to upload"
+        )}
+        {isUploading ? <span className="absolute inset-x-0 bottom-0 h-1 animate-pulse bg-bronze" /> : null}
       </div>
       <div className="mt-5 grid gap-4">
         {images.map((image, index) => (
@@ -370,7 +396,10 @@ export function AdminDashboard() {
           ) : null}
           {uploadMessage ? (
             <p className="basis-full rounded-[6px] bg-bronze/10 px-3 py-2 text-sm text-bronze">
-              {uploadMessage}
+              <span className="inline-flex items-center gap-2">
+                {isUploading ? <UploadSpinner /> : null}
+                {uploadMessage}
+              </span>
             </p>
           ) : null}
         </div>
@@ -567,22 +596,24 @@ export function AdminDashboard() {
                             <div className="mt-4 flex flex-wrap gap-2">
                               <button
                                 type="button"
+                                disabled={isUploading}
                                 onClick={() => heroImageInputRef.current?.click()}
-                                className="button-focus inline-flex items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition"
+                                className="button-focus inline-flex items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze transition hover:bg-bronze hover:text-bone disabled:cursor-not-allowed disabled:opacity-60"
                               >
-                                <ImagePlus size={16} />
-                                <span>+ Upload Hero Image</span>
+                                {isUploading ? <UploadSpinner /> : <ImagePlus size={16} />}
+                                <span>{isUploading ? "Uploading..." : "+ Upload Hero Image"}</span>
                               </button>
                               <input
                                 ref={heroImageInputRef}
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
+                                disabled={isUploading}
                                 onChange={async (event) => {
                                   const file = event.target.files?.[0];
                                   if (!file) return;
                                   try {
-                                    const src = await uploadImage(file);
+                                    const [src] = await uploadImages([file]);
                                     updateProjectField({ heroImage: src });
                                   } catch (error) {
                                     setUploadMessage(error instanceof Error ? error.message : "Image upload failed");
@@ -593,8 +624,9 @@ export function AdminDashboard() {
                               />
                               <button
                                 type="button"
+                                disabled={isUploading}
                                 onClick={() => updateProjectField({ heroImage: "" })}
-                                className="button-focus rounded-[8px] border border-clay/30 bg-white px-4 py-3 text-xs uppercase tracking-[0.18em] text-clay"
+                                className="button-focus rounded-[8px] border border-clay/30 bg-white px-4 py-3 text-xs uppercase tracking-[0.18em] text-clay disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 Remove hero
                               </button>
