@@ -182,10 +182,10 @@ export function AdminDashboard() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <SectionLabel>{label}</SectionLabel>
-          <p className="text-sm text-ink/60">Drag, drop, upload, reorder, and manage captions.</p>
+          <p className="text-sm text-ink/60">Select multiple images, drag & drop, or reorder and edit captions.</p>
         </div>
-        <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-ink/10 bg-bone px-4 py-3 text-xs uppercase tracking-[0.18em] text-ink">
-          Add images
+        <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition">
+          <span>+ Select Images</span>
           <input
             type="file"
             accept="image/*"
@@ -525,8 +525,8 @@ export function AdminDashboard() {
                               <img src={project.heroImage ?? "/media/extra/1.png"} alt={project.title ?? "Hero image"} className="h-full w-full object-cover" />
                             </div>
                             <div className="mt-4 flex flex-wrap gap-2">
-                              <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-ink/10 bg-bone px-4 py-3 text-xs uppercase tracking-[0.18em] text-ink">
-                                Upload hero
+                              <label className="button-focus inline-flex cursor-pointer items-center gap-2 rounded-[8px] border border-bronze bg-bronze/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-bronze hover:bg-bronze hover:text-bone transition">
+                                + Upload Hero Image
                                 <input
                                   type="file"
                                   accept="image/*"

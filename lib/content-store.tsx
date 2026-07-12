@@ -4,6 +4,31 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { normalizePortfolioData, portfolioData, type PortfolioData } from "@/data/portfolio";
 
 const CONTENT_KEY = "diya-portfolio-content";
+
+// Strip image data URLs before storing to localStorage to avoid quota exceeded errors
+function stripLargeImageData(data: PortfolioData): PortfolioData {
+  return {
+    ...data,
+    hero: { ...data.hero, image: undefined },
+    about: {
+      ...data.about,
+      // Keep about bio text, but strip large images from projects
+    },
+    projects: data.projects.map((p) => ({
+      ...p,
+      heroImage: undefined,
+      gallery: [],
+      drawings: [],
+      technical: {
+        before: [],
+        floorPlans: [],
+        technicalDrawings: [],
+        renders: [],
+        concepts: []
+      }
+    }))
+  };
+}
 type ContentContextValue = {
   data: PortfolioData;
   isOwner: boolean;
@@ -30,7 +55,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
         if (content.data) {
           const normalized = normalizePortfolioData(content.data);
           setData(normalized);
-          window.localStorage.setItem(CONTENT_KEY, JSON.stringify(normalized));
+          window.localStorage.setItem(CONTENT_KEY, JSON.stringify(stripLargeImageData(normalized)));
         }
       })
       .catch(() => {
@@ -68,7 +93,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
       updateData: async (next) => {
         const normalized = normalizePortfolioData(next);
         setData(normalized);
-        window.localStorage.setItem(CONTENT_KEY, JSON.stringify(normalized));
+        window.localStorage.setItem(CONTENT_KEY, JSON.stringify(stripLargeImageData(normalized)));
         try {
           const response = await fetch("/api/content", {
             method: "POST",
