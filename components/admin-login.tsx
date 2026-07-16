@@ -30,9 +30,6 @@ export function AdminLogin() {
           <Lock />
         </div>
         <h1 className="font-display text-5xl">Owner login</h1>
-        <p className="mt-3 leading-7 text-ink/62">
-          Use the temporary credentials from `.env.local`. Defaults are ID `diya` and password `change-this-password`.
-        </p>
         <div className="mt-7 grid gap-4">
           <label className="grid gap-2 text-sm uppercase tracking-[0.18em] text-ink/60">
             Owner ID
