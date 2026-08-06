@@ -33,12 +33,7 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href={isOwner ? "/admin" : "/admin/login"}
-            className="rounded-[6px] border border-ink/10 px-3 py-2 text-xs uppercase tracking-[0.18em] text-ink/70 hover:border-bronze hover:text-bronze"
-          >
-            {isOwner ? "Dashboard" : "Owner"}
-          </Link>
+          {/* Owner link removed — handled directly via URL */}
         </div>
         <button
           aria-label="Open navigation"
@@ -55,9 +50,7 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          <Link href="/admin/login" className="px-2 py-3 text-sm uppercase tracking-[0.18em]" onClick={() => setOpen(false)}>
-            Owner
-          </Link>
+          {/* Owner link removed from mobile menu */}
         </div>
       ) : null}
     </header>
