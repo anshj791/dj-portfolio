@@ -15,7 +15,7 @@ const links = [
 
 export function Nav() {
   const [open, setOpen] = useState(false);
-  const { data, isOwner } = useContent();
+  const { data } = useContent();
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 px-4 pt-4">
@@ -33,7 +33,6 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          {/* Owner link removed — handled directly via URL */}
         </div>
         <button
           aria-label="Open navigation"
@@ -50,7 +49,6 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          {/* Owner link removed from mobile menu */}
         </div>
       ) : null}
     </header>

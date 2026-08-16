@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Mail, MapPin, MessageCircle, Phone, Star } from "lucide-react";
+import { ArrowRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { useContent } from "@/lib/content-store";
-import { yearsSince } from "@/lib/utils";
 import { AnimatedSection, GradientButton, HoverCard, SectionLabel } from "@/components/ui/aceternity";
 import { HeroScene } from "@/components/hero-scene";
 import { Nav } from "@/components/nav";
@@ -16,8 +15,6 @@ export function HomePage() {
   const featured = data.projects.slice(0, 4);
   const hasWork = Boolean(data.projects.length);
   const hasServices = Boolean(data.services?.items?.length);
-  const hasTestimonials = Boolean(data.testimonials?.length);
-  const hasProcess = Boolean(data.process?.length);
 
   const whatsappLink = data.owner.whatsapp ? `https://wa.me/${data.owner.whatsapp.replace(/[^0-9]/g, "")}` : undefined;
   const structuredData = {
@@ -88,10 +85,6 @@ export function HomePage() {
               height={980}
               className="aspect-[4/5] rounded-[8px] object-cover shadow-luxury"
             />
-            <div className="absolute bottom-5 left-5 rounded-[8px] bg-bone/88 p-5 backdrop-blur">
-              <p className="font-display text-5xl">{yearsSince(data.about.experienceStartYear)}+</p>
-              <p className="max-w-32 text-xs uppercase tracking-[0.2em] text-ink/60">Years of design study</p>
-            </div>
           </div>
           <div className="flex flex-col justify-center">
             <div className="flex items-center justify-between gap-4">

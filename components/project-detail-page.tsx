@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useContent } from "@/lib/content-store";
 import { AnimatedSection, GradientButton, HoverCard, SectionLabel } from "@/components/ui/aceternity";
 import { Nav } from "@/components/nav";
@@ -148,22 +148,6 @@ export function ProjectDetailPage({ slug }: { slug: string }) {
                 <p className="mt-4 leading-7 text-ink/62">{detail.body}</p>
               </div>
             ))}
-          </AnimatedSection>
-        ) : null}
-
-        {project.testimonial ? (
-          <AnimatedSection className="bg-ink py-20 text-bone">
-            <div className="section-shell">
-              <div className="mb-8 flex gap-1 text-bronze">
-                {Array.from({ length: project.testimonial.rating ?? 0 }).map((_, index) => (
-                  <Star key={index} size={16} fill="currentColor" />
-                ))}
-              </div>
-              <p className="max-w-4xl font-display text-[clamp(2.5rem,6vw,5rem)] leading-[0.95]">"{project.testimonial.quote}"</p>
-              <p className="mt-8 text-sm uppercase tracking-[0.2em] text-bone/60">
-                {project.testimonial.author} / {project.testimonial.role}
-              </p>
-            </div>
           </AnimatedSection>
         ) : null}
 
