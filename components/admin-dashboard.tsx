@@ -110,6 +110,7 @@ export function AdminDashboard() {
   const [publishMessage, setPublishMessage] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
   
   const heroImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -175,6 +176,21 @@ export function AdminDashboard() {
     const projects = [...draft.projects];
     projects[activeProject] = next;
     update({ ...draft, projects });
+  };
+
+  const moveProject = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= draft.projects.length || to >= draft.projects.length) return;
+
+    const projects = reorderArray(draft.projects, from, to);
+    update({ ...draft, projects });
+
+    if (activeProject === from) {
+      setActiveProject(to);
+    } else if (from < activeProject && to >= activeProject) {
+      setActiveProject(activeProject - 1);
+    } else if (from > activeProject && to <= activeProject) {
+      setActiveProject(activeProject + 1);
+    }
   };
 
   const updateProjectField = (patch: Partial<Project>) => {
@@ -476,16 +492,37 @@ export function AdminDashboard() {
                   <Plus size={15} /> Add Project
                 </button>
               </div>
+              <p className="mb-3 text-sm text-ink/58">Drag projects to reorder the public showcase and archive.</p>
               <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
                 {draft.projects.map((item, index) => (
                   <button
                     key={item.slug}
+                    draggable
+                    onDragStart={(event) => {
+                      setDraggedProjectIndex(index);
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", String(index));
+                    }}
+                    onDragEnd={() => setDraggedProjectIndex(null)}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const from = draggedProjectIndex ?? Number(event.dataTransfer.getData("text/plain"));
+                      moveProject(from, index);
+                      setDraggedProjectIndex(null);
+                    }}
                     onClick={() => {
                       setActiveProject(index);
                       setActiveProjectTab("General");
                     }}
-                    className={`button-focus shrink-0 rounded-[8px] border px-4 py-2 text-sm ${activeProject === index ? "border-ink bg-ink text-bone" : "border-ink/10 bg-white"}`}
+                    className={`button-focus shrink-0 cursor-grab rounded-[8px] border px-4 py-2 text-sm active:cursor-grabbing ${
+                      activeProject === index ? "border-ink bg-ink text-bone" : "border-ink/10 bg-white"
+                    } ${draggedProjectIndex === index ? "opacity-45 ring-2 ring-bronze/40" : ""}`}
                   >
+                    <span className="mr-2 text-xs text-current/50">{index + 1}</span>
                     {item.title || `Project ${index + 1}`}
                   </button>
                 ))}
