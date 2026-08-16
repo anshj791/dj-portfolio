@@ -28,6 +28,8 @@ export function ProjectDetailPage({ slug }: { slug: string }) {
     );
   }
 
+  const technicalGroups = projectTechnicalGroups(project);
+
   return (
     <>
       <Nav />
@@ -116,26 +118,43 @@ export function ProjectDetailPage({ slug }: { slug: string }) {
           </AnimatedSection>
         ) : null}
 
-        {projectTechnicalGroups(project).length ? (
-          <AnimatedSection className="section-shell py-20">
-            <SectionLabel>Before / Plans / Technical Drawings</SectionLabel>
-            <div className="grid gap-5 md:grid-cols-2">
-              {projectTechnicalGroups(project).map((group) => (
-                <div key={group.key} className="rounded-[8px] border border-ink/10 bg-white p-4 shadow-sm">
-                  <h2 className="font-display text-2xl">{group.title}</h2>
-                  <div className="mt-5 grid gap-4">
+        {technicalGroups.length ? (
+          <AnimatedSection className="bg-[#f1e7da] py-20">
+            <div className="section-shell">
+              <SectionLabel>Before / Plans / Technical Drawings</SectionLabel>
+              <div className="grid gap-6">
+                {technicalGroups.map((group) => (
+                  <div key={group.key} className="rounded-[8px] border border-ink/10 bg-bone/80 p-4 shadow-sm sm:p-5">
+                    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-ink/10 pb-4">
+                      <h2 className="font-display text-3xl leading-none text-ink">{group.title}</h2>
+                      <span className="text-xs uppercase tracking-[0.22em] text-ink/45">
+                        {group.images.length} {group.images.length === 1 ? "sheet" : "sheets"}
+                      </span>
+                    </div>
+                    <div className="mt-5 grid gap-4 lg:grid-cols-2">
                     {group.images.map((image, index) => (
-                      <div key={`${image.src}-${index}`} className="rounded-[8px] overflow-hidden border border-ink/10 bg-[#fbf6f0]">
-                        <Image src={image.src} alt={(image.alt ?? image.label) || image.src} width={900} height={650} className="h-auto w-full object-contain" />
-                        <div className="p-4">
-                          {image.label ? <p className="text-sm uppercase tracking-[0.18em] text-ink/58">{image.label}</p> : null}
-                          {image.description ? <p className="mt-2 text-ink/70">{image.description}</p> : null}
+                      <div key={`${image.src}-${index}`} className="overflow-hidden rounded-[8px] border border-ink/10 bg-[#fbf7f0]">
+                        <div className="grid h-[280px] place-items-center bg-white p-3 sm:h-[360px] lg:h-[420px]">
+                          <Image
+                            src={image.src}
+                            alt={(image.alt ?? image.label) || image.src}
+                            width={1100}
+                            height={800}
+                            className="max-h-full w-full object-contain"
+                          />
                         </div>
-                      </div>
+                        {(image.label || image.description) ? (
+                          <div className="border-t border-ink/10 px-4 py-3">
+                            {image.label ? <p className="text-xs uppercase tracking-[0.18em] text-ink/62">{image.label}</p> : null}
+                            {image.description ? <p className="mt-2 text-sm leading-6 text-ink/66">{image.description}</p> : null}
+                          </div>
+                        ) : null}
+                        </div>
                     ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </AnimatedSection>
         ) : null}
