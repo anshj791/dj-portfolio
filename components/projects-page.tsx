@@ -10,32 +10,42 @@ import { Nav } from "@/components/nav";
 import { Footer } from "@/components/home-page";
 import { OwnerToolbar } from "@/components/owner-toolbar";
 
+function categoryKey(value?: string | null) {
+  return (value || "").trim().toLowerCase();
+}
+
 export function ProjectsPage() {
   const { data } = useContent();
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState("all");
   const insertedCategories = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          data.projects
-            .map((project) => project.category?.trim())
-            .filter((item): item is string => Boolean(item))
-        )
-      ),
+    () => {
+      const categoryMap = new Map<string, string>();
+
+      data.projects.forEach((project) => {
+        const label = project.category?.trim();
+        const key = categoryKey(label);
+
+        if (label && !categoryMap.has(key)) {
+          categoryMap.set(key, label);
+        }
+      });
+
+      return Array.from(categoryMap, ([key, label]) => ({ key, label }));
+    },
     [data.projects]
   );
-  const categories = ["All", ...insertedCategories];
+  const categories = [{ key: "all", label: "All" }, ...insertedCategories];
   const projects = useMemo(
-    () => (category === "All" ? data.projects : data.projects.filter((project) => project.category === category)),
+    () => (category === "all" ? data.projects : data.projects.filter((project) => categoryKey(project.category) === category)),
     [category, data.projects]
   );
   const categoryDescription = insertedCategories.length
-    ? `${insertedCategories.join(", ")} work rendered through a consistent design template.`
+    ? `${insertedCategories.map((item) => item.label).join(", ")} work rendered through a consistent design template.`
     : "A curated archive of design work rendered through a consistent design template.";
 
   useEffect(() => {
-    if (category !== "All" && !insertedCategories.includes(category)) {
-      setCategory("All");
+    if (category !== "all" && !insertedCategories.some((item) => item.key === category)) {
+      setCategory("all");
     }
   }, [category, insertedCategories]);
 
@@ -53,13 +63,13 @@ export function ProjectsPage() {
             <div className="mt-9 flex flex-wrap gap-2">
               {categories.map((item) => (
                 <button
-                  key={item}
-                  onClick={() => setCategory(item)}
+                  key={item.key}
+                  onClick={() => setCategory(item.key)}
                   className={`button-focus rounded-[8px] border px-4 py-2 text-xs uppercase tracking-[0.18em] transition ${
-                    category === item ? "border-ink bg-ink text-bone" : "border-ink/10 bg-bone text-ink/66 hover:border-bronze"
+                    category === item.key ? "border-ink bg-ink text-bone" : "border-ink/10 bg-bone text-ink/66 hover:border-bronze"
                   }`}
                 >
-                  {item}
+                  {item.label}
                 </button>
               ))}
             </div>
